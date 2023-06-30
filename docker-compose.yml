@@ -8,8 +8,7 @@ services:
     # use python rather than gunicorn for local dev
     command: python app.py
     depends_on:
-      redis:
-        condition: service_healthy
+      - redis
     healthcheck: 
       test: ["CMD", "curl", "-f", "http://localhost"]
       interval: 15s
@@ -29,8 +28,7 @@ services:
     # use nodemon rather than node for local dev
     entrypoint: nodemon server.js
     depends_on:
-      db:
-        condition: service_healthy 
+      - db 
     volumes:
       - ./result:/app
     ports:
@@ -44,10 +42,8 @@ services:
     build:
       context: ./worker
     depends_on:
-      redis:
-        condition: service_healthy 
-      db:
-        condition: service_healthy 
+      - redis
+      - db 
     networks:
       - back-tier
 
@@ -55,9 +51,6 @@ services:
     image: redis:alpine
     volumes:
       - "./healthchecks:/healthchecks"
-    healthcheck:
-      test: /healthchecks/redis.sh
-      interval: "5s"
     networks:
       - back-tier
 
@@ -69,9 +62,6 @@ services:
     volumes:
       - "db-data:/var/lib/postgresql/data"
       - "./healthchecks:/healthchecks"
-    healthcheck:
-      test: /healthchecks/postgres.sh
-      interval: "5s"
     networks:
       - back-tier
 
